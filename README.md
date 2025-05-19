@@ -13,7 +13,7 @@ This project implements an algorithm for a Support Vector Machine (SVM). SVMs ar
 - 
 
 ## Useful Resources
-- 
+- Step by Step of the Algorithm : https://towardsdatascience.com/implementing-svm-from-scratch-784e4ad0bc6a/
 
 ### SVM Fundamentals
 - [Support Vector Machines - Scikit-learn Documentation](https://scikit-learn.org/stable/modules/svm.html)
