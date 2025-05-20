@@ -1,7 +1,7 @@
 # Building an SVM from Scratch
 
 ## Team Members
-- EThan Swenke
+- Ethan Swenke
 - Leah Sarles
 - Ronan Valadez
 - Gannon Bardasian
@@ -12,6 +12,8 @@ This project implements an algorithm for a Support Vector Machine (SVM). SVMs ar
 ## Datasets
 - https://www.kaggle.com/datasets/brsahan/mouse-viral-infection-study-dataset/data
 - https://www.kaggle.com/datasets/mastershomya/iris-dataset
+- https://www.kaggle.com/datasets/chandramoulinaidu/spam-classification-for-basic-nlp
+- https://www.kaggle.com/datasets/ujjwalchowdhury/walmartcleaned
 
 ## Useful Resources
 -
