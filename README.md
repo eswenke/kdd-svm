@@ -14,6 +14,8 @@ This project implements an algorithm for a Support Vector Machine (SVM). SVMs ar
 - https://www.kaggle.com/datasets/mastershomya/iris-dataset
 - https://www.kaggle.com/datasets/chandramoulinaidu/spam-classification-for-basic-nlp
 - https://www.kaggle.com/datasets/ujjwalchowdhury/walmartcleaned
+- https://www.kaggle.com/datasets/alexkataev/bank-marketing-data-set
+- https://www.kaggle.com/datasets/mexwell/binary-classification-for-sensor-signals/data
 
 ## Useful Resources
 -
