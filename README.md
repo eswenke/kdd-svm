@@ -8,7 +8,7 @@
 
 
 ## Running The Project
-
+ `mvn compile exec:java -Dexec.mainClass="SVM`
 
 ## Project Overview
 This project implements an algorithm for a Support Vector Machine (SVM). SVMs are powerful supervised learning models used for classification, regression, and outlier detection. We will be working with a dataset involving basic binary classification.

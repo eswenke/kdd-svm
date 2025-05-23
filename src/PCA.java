@@ -1,98 +1,43 @@
-import java.util.Arrays;
+package your.package;
+
+import org.apache.commons.math3.linear.*;
 
 public class PCA {
+    public static RealMatrix computeCovarianceMatrix(double[][] data) {
+        RealMatrix matrix = MatrixUtils.createRealMatrix(data);
+        RealMatrix meanAdjusted = matrix.copy();
 
-    private double[][] data; // rows: observations, cols: variables
-
-    public PCA(double[][] data) {
-        this.data = data;
-    }
-
-    public Result runPCA(int numComponents) {
-        double[][] meanCentered = meanCenter(data);
-        double[][] covarianceMatrix = computeCovarianceMatrix(meanCentered);
-        EigenDecomposition eig = new EigenDecomposition(covarianceMatrix);
-        
-        // Select top N eigenvectors
-        double[][] topEigenvectors = new double[numComponents][];
-        for (int i = 0; i < numComponents; i++) {
-            topEigenvectors[i] = eig.getEigenvector(i);
-        }
-
-        // Project data onto new basis
-        double[][] transformedData = multiply(meanCentered, transpose(topEigenvectors));
-        return new Result(transformedData, topEigenvectors, eig.getEigenvalues());
-    }
-
-    private double[][] meanCenter(double[][] data) {
-        int rows = data.length, cols = data[0].length;
-        double[] means = new double[cols];
-
-        for (int j = 0; j < cols; j++) {
-            for (int i = 0; i < rows; i++) {
-                means[j] += data[i][j];
+        // Center the data (subtract column mean)
+        for (int col = 0; col < matrix.getColumnDimension(); col++) {
+            double mean = 0;
+            for (int row = 0; row < matrix.getRowDimension(); row++) {
+                mean += matrix.getEntry(row, col);
             }
-            means[j] /= rows;
-        }
-
-        double[][] centered = new double[rows][cols];
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                centered[i][j] = data[i][j] - means[j];
+            mean /= matrix.getRowDimension();
+            for (int row = 0; row < matrix.getRowDimension(); row++) {
+                meanAdjusted.addToEntry(row, col, -mean);
             }
         }
-        return centered;
+
+        // Covariance matrix = (X^T * X) / (n - 1)
+        RealMatrix transposed = meanAdjusted.transpose();
+        RealMatrix covariance = transposed.multiply(meanAdjusted).scalarMultiply(1.0 / (matrix.getRowDimension() - 1));
+        return covariance;
     }
 
-    private double[][] computeCovarianceMatrix(double[][] data) {
-        int n = data.length;
-        int dim = data[0].length;
-        double[][] cov = new double[dim][dim];
+    public static void runPCA(double[][] data) {
+        RealMatrix cov = computeCovarianceMatrix(data);
+        EigenDecomposition ed = new EigenDecomposition(cov);
 
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
-                double sum = 0;
-                for (int k = 0; k < n; k++) {
-                    sum += data[k][i] * data[k][j];
-                }
-                cov[i][j] = sum / (n - 1); // Sample covariance
-            }
+        System.out.println("Eigenvalues:");
+        for (double val : ed.getRealEigenvalues()) {
+            System.out.println(val);
         }
-        return cov;
-    }
 
-    private double[][] multiply(double[][] A, double[][] B) {
-        int aRows = A.length, aCols = A[0].length, bCols = B[0].length;
-        double[][] result = new double[aRows][bCols];
-
-        for (int i = 0; i < aRows; i++) {
-            for (int j = 0; j < bCols; j++) {
-                for (int k = 0; k < aCols; k++) {
-                    result[i][j] += A[i][k] * B[k][j];
-                }
-            }
-        }
-        return result;
-    }
-
-    private double[][] transpose(double[][] A) {
-        int rows = A.length, cols = A[0].length;
-        double[][] T = new double[cols][rows];
-        for (int i = 0; i < rows; i++)
-            for (int j = 0; j < cols; j++)
-                T[j][i] = A[i][j];
-        return T;
-    }
-
-    public static class Result {
-        public double[][] transformedData;
-        public double[][] principalComponents;
-        public double[] eigenvalues;
-
-        public Result(double[][] transformedData, double[][] principalComponents, double[] eigenvalues) {
-            this.transformedData = transformedData;
-            this.principalComponents = principalComponents;
-            this.eigenvalues = eigenvalues;
+        System.out.println("\nEigenvectors:");
+        RealMatrix V = ed.getV();
+        for (int i = 0; i < V.getColumnDimension(); i++) {
+            System.out.println("PC" + (i + 1) + ": " + V.getColumnVector(i));
         }
     }
 }
