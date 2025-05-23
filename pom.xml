@@ -9,12 +9,9 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <dependencies>
         <dependency>
 
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
-            <version>3.6.1</version>
-    <configuration>
-        <mainClass>com.example.SVM.java</mainClass>
-    </configuration>
-        </dependency>
-    </dependencies>
+<groupId>org.apache.commons</groupId>
+<artifactId>commons-math3</artifactId>
+<version>3.6.1</version>
+</dependency>
+</dependencies>
 </project>
