@@ -6,6 +6,10 @@
 - Ronan Valadez
 - Gannon Bardasian
 
+
+## Running The Project
+
+
 ## Project Overview
 This project implements an algorithm for a Support Vector Machine (SVM). SVMs are powerful supervised learning models used for classification, regression, and outlier detection. We will be working with a dataset involving basic binary classification.
 
@@ -21,7 +25,7 @@ This project implements an algorithm for a Support Vector Machine (SVM). SVMs ar
 - https://www.kaggle.com/datasets/parisrohan/credit-score-classification 
 
 ## Useful Resources
--
+- PCA : 
 
 ### SVM Fundamentals
 - [Support Vector Machines - Scikit-learn Documentation](https://scikit-learn.org/stable/modules/svm.html)
