@@ -23,6 +23,7 @@ This project implements an algorithm for a Support Vector Machine (SVM). SVMs ar
 - https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction
 - https://www.kaggle.com/datasets/fedesoriano/company-bankruptcy-prediction
 - https://www.kaggle.com/datasets/parisrohan/credit-score-classification 
+- https://www.kaggle.com/datasets/yasserh/wine-quality-dataset
 
 ## Useful Resources
 - PCA : 
