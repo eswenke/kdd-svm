@@ -1,12 +1,10 @@
+package files;
+
 import java.io.*;
 import java.util.*;
 
+
 public class CSVReader {
-
-    import java.io.*;
-import java.util.*;
-
-    public class CSVReader {
 
         public static double[][] readCSV(String filename) throws IOException {
             List<double[]> rows = new ArrayList<>();
@@ -35,4 +33,4 @@ import java.util.*;
         }
     }
 
-}
+
