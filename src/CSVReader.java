@@ -3,32 +3,36 @@ import java.util.*;
 
 public class CSVReader {
 
-    public static List<DataPoint> readCSV(String filePath) {
-        List<DataPoint> dataList = new ArrayList<>();
+    import java.io.*;
+import java.util.*;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+    public class CSVReader {
+
+        public static double[][] readCSV(String filename) throws IOException {
+            List<double[]> rows = new ArrayList<>();
+
+            BufferedReader reader = new BufferedReader(new FileReader(filename));
             String line;
-            boolean firstLine = true;
 
-            while ((line = br.readLine()) != null) {
-                if (firstLine) {
-                    firstLine = false; // skip header
-                    continue;
-                }
-
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) continue; // Skip empty lines
                 String[] tokens = line.split(",");
-                if (tokens.length >= 3) {
-                    double col1 = Double.parseDouble(tokens[0]);
-                    double col2 = Double.parseDouble(tokens[1]);
-                    double col3 = Double.parseDouble(tokens[2]);
-                    dataList.add(new DataPoint(col1, col2, col3));
+                double[] values = new double[tokens.length];
+                for (int i = 0; i < tokens.length; i++) {
+                    values[i] = Double.parseDouble(tokens[i].trim());
                 }
+                rows.add(values);
+            }
+            reader.close();
+
+            // Convert List to double[][]
+            double[][] result = new double[rows.size()][];
+            for (int i = 0; i < rows.size(); i++) {
+                result[i] = rows.get(i);
             }
 
-        } catch (IOException | NumberFormatException e) {
-            e.printStackTrace();
+            return result;
         }
-
-        return dataList;
     }
+
 }

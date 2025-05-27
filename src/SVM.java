@@ -5,7 +5,10 @@ public class SVM {
 
         public static void main(String[] args) {
             public static void main(String[] args) {
-                List<DataPoint> data = CSVReader.readCSV("somedataset.csv");
+                double[][] data = CSVReader.readCSV("somedataset.csv"); // read some data
+                runPCA(data);
+
+
                 for (DataPoint dp : data) {
                     System.out.println(dp);
                 }
