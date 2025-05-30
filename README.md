@@ -15,14 +15,6 @@ This project implements an algorithm for a Support Vector Machine (SVM). SVMs ar
 
 ## Dataset
 - https://www.kaggle.com/datasets/mexwell/binary-classification-for-sensor-signals/data
-<<<<<<< HEAD
-- https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction
-- https://www.kaggle.com/datasets/fedesoriano/company-bankruptcy-prediction
-- https://www.kaggle.com/datasets/parisrohan/credit-score-classification 
-- https://www.kaggle.com/datasets/yasserh/wine-quality-dataset
-=======
-
->>>>>>> plan
 
 ## Useful Resources
 - PCA : 
