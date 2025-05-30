@@ -52,13 +52,11 @@ This document outlines a plan for implementing a Support Vector Machine (SVM) fr
 
 1. **Model Evaluation**
    - Implement metrics:
-     - Accuracy, precision, recall, F1 score
+     - Precision, Recall, F1 score
      - Confusion matrix
+     - Accuracy on testing set
 
-2. **Cross-Validation**
-   - Implement k-fold cross-validation to assess model performance
-
-3. **Optional: Simple Visualization**
+2. **Optional: Simple Visualization**
    - If time permits, create simple visualization of the decision boundary
    - Could use external libraries or generate data for plotting elsewhere
 
