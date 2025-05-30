@@ -67,22 +67,21 @@ This document outlines a plan for implementing a Support Vector Machine (SVM) fr
 ```
 svm/
 ├── src/
-│   └── files/
-│       ├── CSVReader.java          [Existing]
-│       ├── SVM.java                [Existing - Main class]
-│       ├── data/
-│       │   ├── DataPreprocessor.java
-│       │   └── DataSplitter.java
-│       ├── model/
-│       │   ├── SVMModel.java
-│       │   ├── SMOOptimizer.java
-│       │   └── Kernel.java
-│       ├── math/
-│       │   ├── VectorOps.java
-│       │   └── MatrixOps.java
-│       └── evaluation/
-│           ├── Metrics.java
-│           └── CrossValidator.java
+│   ├── SVM.java                [Existing - Main class]
+│   ├── processing/
+│   │   ├── CSVReader.java
+│   │   ├── DataPreprocessor.java
+│   │   └── DataSplitter.java
+│   ├── model/
+│   │   ├── SVMModel.java
+│   │   ├── SMOOptimizer.java
+│   │   └── Kernel.java
+│   ├── math/
+│   │   ├── VectorOps.java
+│   │   └── MatrixOps.java
+│   └── evaluation/
+│       ├── Metrics.java
+│       └── ModelEvaluator.java
 ```
 
 ## Implementation Order
