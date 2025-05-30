@@ -10,6 +10,8 @@ public class SVM {
         CSVReader reader = new CSVReader();
         double[][] data = reader.readCSV("somedataset.csv"); // read some data
 
+        // branch init for processing
+
         // Main SVM logic will go here
         System.out.println("Loaded data with " + data.length + " rows and " + 
                           (data.length > 0 ? data[0].length : 0) + " columns");
