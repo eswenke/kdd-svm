@@ -13,16 +13,9 @@
 ## Project Overview
 This project implements an algorithm for a Support Vector Machine (SVM). SVMs are powerful supervised learning models used for classification, regression, and outlier detection. We will be working with a dataset involving basic binary classification.
 
-## Datasets
-- https://www.kaggle.com/datasets/brsahan/mouse-viral-infection-study-dataset/data
-- https://www.kaggle.com/datasets/mastershomya/iris-dataset
-- https://www.kaggle.com/datasets/chandramoulinaidu/spam-classification-for-basic-nlp
-- https://www.kaggle.com/datasets/ujjwalchowdhury/walmartcleaned
-- https://www.kaggle.com/datasets/alexkataev/bank-marketing-data-set
+## Dataset
 - https://www.kaggle.com/datasets/mexwell/binary-classification-for-sensor-signals/data
-- https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction
-- https://www.kaggle.com/datasets/fedesoriano/company-bankruptcy-prediction
-- https://www.kaggle.com/datasets/parisrohan/credit-score-classification 
+
 
 ## Useful Resources
 - PCA : 
