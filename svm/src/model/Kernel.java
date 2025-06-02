@@ -41,7 +41,7 @@ class LinearKernel implements Kernel {
     public double compute(double[] x, double[] y) {
         // TODO: Implement linear kernel (dot product)
         // Use VectorOps.dotProduct(x, y)
-        return 0.0;
+        return VectorOps.dotProduct(x, y);
     }
     
     @Override
@@ -57,11 +57,61 @@ class LinearKernel implements Kernel {
  * Useful for data that has non-linear decision boundaries.
  * K(x, y) = (x · y + c)^d where c is a constant and d is the degree.
  */
-// class PolynomialKernel implements Kernel { ... }
+class PolynomialKernel implements Kernel {
+    private final double constant;
+    private final int degree;
+    
+    // Constructor with custom parameters
+    public PolynomialKernel(double constant, int degree) {
+        this.constant = constant;
+        this.degree = degree;
+    }
+
+    @Override
+    public double compute(double[] x, double[] y) {
+        double dotProduct = VectorOps.dotProduct(x, y);
+        // K(x, y) = (x · y + c)^d
+        return Math.pow(dotProduct + this.constant, this.degree);
+    }
+
+    @Override
+    public String getName() {
+        return "Polynomial Kernel";
+    }
+}
 
 /*
  * Radial Basis Function (RBF) kernel implementation.
  * Useful for complex non-linear classification tasks.
  * K(x, y) = exp(-gamma * ||x - y||^2)
  */
-// class RBFKernel implements Kernel { ... }
+class RBFKernel implements Kernel {
+    private final double gamma;
+    
+    // Constructor with custom gamma parameter
+    public RBFKernel(double gamma) {
+        this.gamma = gamma;
+    }
+
+    @Override
+    public double compute(double[] x, double[] y) {
+        // Calculate squared Euclidean distance ||x - y||^2
+        if (x.length != y.length) {
+            throw new IllegalArgumentException("Vectors must have the same length");
+        }
+        
+        double squaredDistance = 0.0;
+        for (int i = 0; i < x.length; i++) {
+            double diff = x[i] - y[i];
+            squaredDistance += diff * diff;
+        }
+        
+        // K(x, y) = exp(-gamma * ||x - y||^2)
+        return Math.exp(-this.gamma * squaredDistance);
+    }
+
+    @Override
+    public String getName() {
+        return "RBF Kernel";
+    }
+}
