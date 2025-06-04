@@ -1,9 +1,10 @@
+package testing;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import evaluation.Metrics;
 import org.junit.jupiter.api.Test;
 
-public class Testing {
+public class MetricsTesting {
 
 
     @Test
