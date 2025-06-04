@@ -55,6 +55,9 @@ public class SVMModel {
         // 1. Use SMO optimizer to find alphas and bias
         // 2. Identify support vectors (data points with non-zero alphas)
         // 3. Store support vectors and their labels
+        Object[] parameters = optimizer.optimize(X, y);
+
+
         return this;
     }
     
