@@ -17,11 +17,38 @@ public class DataPreprocessor {
      * @return Normalized data matrix
      */
     public double[][] normalize(double[][] data) {
-        // TODO: Implement normalization logic
-        // For each feature (column):
-        // 1. Find min and max values
-        // 2. Scale values to [0,1] using (x - min) / (max - min)
-        return null;
+        if (data == null || data.length == 0) {
+            return new double[0][0];
+        }
+        
+        int rows = data.length;
+        int cols = data[0].length;
+        double[][] normalized = new double[rows][cols];
+        
+        // process each feature (column)
+        for (int col = 0; col < cols; col++) {
+            // find min and max values
+            double min = Double.MAX_VALUE;
+            double max = Double.MIN_VALUE;
+            
+            for (int row = 0; row < rows; row++) {
+                min = Math.min(min, data[row][col]);
+                max = Math.max(max, data[row][col]);
+            }
+            
+            // normalize values to [0,1]
+            double range = max - min;
+            for (int row = 0; row < rows; row++) {
+                // handle case where all values are the same
+                if (range == 0) {
+                    normalized[row][col] = 0.5; // set to middle of range
+                } else {
+                    normalized[row][col] = (data[row][col] - min) / range;
+                }
+            }
+        }
+        
+        return normalized;
     }
     
     /**
@@ -33,11 +60,44 @@ public class DataPreprocessor {
      * @return Standardized data matrix
      */
     public double[][] standardize(double[][] data) {
-        // TODO: Implement standardization logic
-        // For each feature (column):
-        // 1. Calculate mean and standard deviation
-        // 2. Scale values using (x - mean) / stdDev
-        return null;
+        if (data == null || data.length == 0) {
+            return new double[0][0];
+        }
+        
+        int rows = data.length;
+        int cols = data[0].length;
+        double[][] standardized = new double[rows][cols];
+        
+        // process each feature (column)
+        for (int col = 0; col < cols; col++) {
+            // calculate mean
+            double sum = 0;
+            for (int row = 0; row < rows; row++) {
+                sum += data[row][col];
+            }
+            double mean = sum / rows;
+            
+            // calculate standard deviation
+            double variance = 0;
+            for (int row = 0; row < rows; row++) {
+                double diff = data[row][col] - mean;
+                variance += diff * diff;
+            }
+            variance /= rows;
+            double stdDev = Math.sqrt(variance);
+            
+            // standardize values
+            for (int row = 0; row < rows; row++) {
+                // handle case where stdDev is zero
+                if (stdDev < 1e-10) {
+                    standardized[row][col] = 0;
+                } else {
+                    standardized[row][col] = (data[row][col] - mean) / stdDev;
+                }
+            }
+        }
+        
+        return standardized;
     }
     
     /**
@@ -50,9 +110,35 @@ public class DataPreprocessor {
      * @return An array with two elements: features matrix and labels array
      */
     public Object[] splitFeaturesAndLabels(double[][] data, int labelColumn) {
-        // TODO: Implement feature/label splitting
-        // 1. Extract features (all columns except labelColumn)
-        // 2. Extract labels (only labelColumn)
-        return null;
+        if (data == null || data.length == 0) {
+            return new Object[]{new double[0][0], new double[0]};
+        }
+        
+        int rows = data.length;
+        int cols = data[0].length;
+        
+        // validate labelColumn
+        if (labelColumn < 0 || labelColumn >= cols) {
+            throw new IllegalArgumentException("label column index out of bounds");
+        }
+        
+        // create feature matrix (all columns except labelColumn)
+        double[][] features = new double[rows][cols - 1];
+        double[] labels = new double[rows];
+        
+        for (int row = 0; row < rows; row++) {
+            int featureCol = 0;
+            for (int col = 0; col < cols; col++) {
+                if (col == labelColumn) {
+                    // extract label
+                    labels[row] = data[row][col];
+                } else {
+                    // extract feature
+                    features[row][featureCol++] = data[row][col];
+                }
+            }
+        }
+        
+        return new Object[]{features, labels};
     }
 }
