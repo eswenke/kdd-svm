@@ -57,6 +57,8 @@ public class SMOOptimizer {
      * @return An array containing the Lagrange multipliers and bias term
      */
     public Object[] optimize(double[][] X, double[] y) {
+        // EQUATIONS:
+        // -----------------------
         // 1. SVM Decision Function (used for predictions and error calculation):
         //    f(x) = Σ αᵢ·yᵢ·K(xᵢ, x) + b
         //    where K is the kernel function (in simple case, dot product: K(x,z) = x·z)

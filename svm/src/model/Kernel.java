@@ -35,7 +35,7 @@ public interface Kernel {
  * The linear kernel is defined as K(x, y) = x · y (dot product).
  * This is the simplest kernel and is suitable for linearly separable data.
  */
-class LinearKernel implements Kernel {
+public class LinearKernel implements Kernel {
     
     @Override
     public double compute(double[] x, double[] y) {
@@ -57,7 +57,7 @@ class LinearKernel implements Kernel {
  * Useful for data that has non-linear decision boundaries.
  * K(x, y) = (x · y + c)^d where c is a constant and d is the degree.
  */
-class PolynomialKernel implements Kernel {
+public class PolynomialKernel implements Kernel {
     private final double constant;
     private final int degree;
     
@@ -85,7 +85,7 @@ class PolynomialKernel implements Kernel {
  * Useful for complex non-linear classification tasks.
  * K(x, y) = exp(-gamma * ||x - y||^2)
  */
-class RBFKernel implements Kernel {
+public class RBFKernel implements Kernel {
     private final double gamma;
     
     // Constructor with custom gamma parameter
