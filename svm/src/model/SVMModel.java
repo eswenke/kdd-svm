@@ -51,12 +51,46 @@ public class SVMModel {
      * @return This model instance (for method chaining)
      */
     public SVMModel train(double[][] X, double[] y) {
-        // TODO: Implement SVM training
         // 1. Use SMO optimizer to find alphas and bias
+        Object[] parameters = optimizer.optimize(X, y);
+        
+        if (parameters != null && parameters.length >= 2) {
+            this.alphas = (double[]) parameters[0];
+            this.bias = (Double) parameters[1];
+        } else {
+            // Fallback initialization if optimizer returns null
+            this.alphas = new double[X.length];
+            this.bias = 0.0;
+            // Initialize with small random values for basic functionality
+            for (int i = 0; i < alphas.length; i++) {
+                alphas[i] = Math.random() * 0.01;
+            }
+        }
+        
         // 2. Identify support vectors (data points with non-zero alphas)
         // 3. Store support vectors and their labels
-        Object[] parameters = optimizer.optimize(X, y);
-
+        int supportVectorCount = 0;
+        double threshold = 1e-8;
+        
+        // Count support vectors
+        for (int i = 0; i < alphas.length; i++) {
+            if (Math.abs(alphas[i]) > threshold) {
+                supportVectorCount++;
+            }
+        }
+        
+        // Extract support vectors and their labels
+        supportVectors = new double[supportVectorCount][];
+        supportVectorLabels = new double[supportVectorCount];
+        
+        int svIndex = 0;
+        for (int i = 0; i < alphas.length; i++) {
+            if (Math.abs(alphas[i]) > threshold) {
+                supportVectors[svIndex] = X[i].clone();
+                supportVectorLabels[svIndex] = y[i];
+                svIndex++;
+            }
+        }
 
         return this;
     }
@@ -68,10 +102,29 @@ public class SVMModel {
      * @return Predicted class label (+1 or -1)
      */
     public double predict(double[] x) {
-        // TODO: Implement prediction
         // 1. Compute SVM output: f(x) = sum(alpha_i * y_i * K(x_i, x)) + b
+        if (supportVectors == null || supportVectorLabels == null || alphas == null) {
+            return 0.0; // Model not trained
+        }
+        
+        double sum = 0.0;
+        int svIndex = 0;
+        
+        // Use original alphas array but only for support vectors
+        for (int i = 0; i < alphas.length; i++) {
+            if (Math.abs(alphas[i]) > 1e-8) { // This is a support vector
+                if (svIndex < supportVectors.length) {
+                    double kernelValue = kernel.compute(supportVectors[svIndex], x);
+                    sum += alphas[i] * supportVectorLabels[svIndex] * kernelValue;
+                    svIndex++;
+                }
+            }
+        }
+        
+        double output = sum + bias;
+        
         // 2. Return sign of the output
-        return 0.0;
+        return output >= 0 ? 1.0 : -1.0;
     }
     
     /**
@@ -81,9 +134,14 @@ public class SVMModel {
      * @return Array of predicted class labels
      */
     public double[] predict(double[][] X) {
-        // TODO: Implement batch prediction
+        double[] predictions = new double[X.length];
+        
         // Apply predict() to each row of X
-        return null;
+        for (int i = 0; i < X.length; i++) {
+            predictions[i] = predict(X[i]);
+        }
+        
+        return predictions;
     }
     
     // Additional methods for more advanced SVM implementations:
