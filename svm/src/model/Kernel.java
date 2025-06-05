@@ -35,7 +35,7 @@ public interface Kernel {
  * The linear kernel is defined as K(x, y) = x · y (dot product).
  * This is the simplest kernel and is suitable for linearly separable data.
  */
-class LinearKernel implements Kernel {
+public class LinearKernel implements Kernel {
     
     @Override
     public double compute(double[] x, double[] y) {
