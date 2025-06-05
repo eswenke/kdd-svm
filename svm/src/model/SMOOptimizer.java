@@ -39,6 +39,17 @@ public class SMOOptimizer {
     }
     
     /**
+     * Creates an SMO optimizer with default C value of 1.0.
+     * 
+     * @param tolerance Tolerance for KKT conditions
+     * @param maxIterations Maximum number of iterations
+     * @param kernel Kernel function to use
+     */
+    public SMOOptimizer(double tolerance, int maxIterations, Kernel kernel) {
+        this(1.0, tolerance, maxIterations, kernel);
+    }
+    
+    /**
      * Optimizes the SVM model using a simplified SMO algorithm.
      * 
      * @param X Training features
@@ -46,41 +57,49 @@ public class SMOOptimizer {
      * @return An array containing the Lagrange multipliers and bias term
      */
     public Object[] optimize(double[][] X, double[] y) {
-        // TODO: Implement a simplified SMO algorithm
-        // 1. Initialize Lagrange multipliers (alphas) to 0
-        // 2. Initialize bias term (b) to 0
-        // 3. Main SMO loop (up to max iterations):
-        //    a. Randomly select two alphas to optimize (alphas are coefficients assigned to each
-        //       training data point that determine how important they are for defining the decision
-        //       boundary)
-        //    b. Optimize the two alphas analytically (using math)
-        //    c. Update bias term (a scalar value that shifts the decision boundary - like the 
-        //       y-intercept in the equation of a line)
-        //    d. Check for convergence (kkt conditions or other criteria such as changes in 
-        //       alpha values or bias. kkt conditions checker might be another helper func we need
-        //       but not necessary if we want to be even more barebones)
+        // 1. SVM Decision Function (used for predictions and error calculation):
+        //    f(x) = Σ αᵢ·yᵢ·K(xᵢ, x) + b
+        //    where K is the kernel function (in simple case, dot product: K(x,z) = x·z)
         
-        // Return alphas and bias
+        // 2. Error Calculation:
+        //    E_i = f(x_i) - y_i
+        
+        // 3. Alpha Update Steps:
+        //    a. Compute η = 2·K(x₁,x₂) - K(x₁,x₁) - K(x₂,x₂)
+        //    b. Calculate unconstrained α₂_new = α₂ - y₂·(E₁ - E₂)/η
+        //    c. Compute bounds for α₂_new:
+        //       If y₁ ≠ y₂: L = max(0, α₂ - α₁), H = min(C, C + α₂ - α₁)
+        //       If y₁ = y₂: L = max(0, α₁ + α₂ - C), H = min(C, α₁ + α₂)
+        //    d. Clip α₂_new to bounds: α₂_new = min(H, max(L, α₂_new))
+        //    e. Update α₁_new = α₁ + y₁·y₂·(α₂ - α₂_new)
+        
+        // 4. Bias Update:
+        //    b_new = b - E₁ - y₁·(α₁_new - α₁)·K(x₁,x₁) - y₂·(α₂_new - α₂)·K(x₁,x₂)
+        
+        // --- IMPLEMENTATION PLAN ---
+        
+        // 1. Initialize model parameters
+        // TODO: Initialize alpha array to zeros, bias to 0, and prepare error cache array
+        
+        // 2. Main optimization loop (fixed number of iterations)
+        // TODO: Loop for a fixed number of iterations (e.g., maxIter = 100)
+        
+        // 3. Select two alphas to optimize
+        // TODO: Simple selection - randomly choose two different indices
+        
+        // 4. Optimize selected alpha pair using helper method
+        // TODO: Call optimizePair() with selected indices
+        
+        // 5. Update bias
+        // TODO: Calculate new bias term after alpha updates
+        
+        // 6. Update error cache
+        // TODO: Recalculate errors for all points after alpha/bias update
+        
+        // 7. Prepare and return results
+        // TODO: Return alpha values, bias, and indices of support vectors (where alpha > 0)
+        
         return null;
-    }
-    
-    /**
-     * Optimizes two alpha coefficients analytically.
-     * 
-     * @param i First alpha index
-     * @param j Second alpha index
-     * @param alphas Current alpha values
-     * @param X Training features
-     * @param y Training labels
-     * @param b Current bias term
-     * @return Whether the alphas were changed
-     */
-    private boolean optimizePair(int i, int j, double[] alphas, double[][] X, double[] y, double b) {
-        // TODO: Implement pair optimization (research this and implement)
-        // 1. Compute bounds for new alpha values
-        // 2. Compute new alpha values
-        // 3. Clip alpha values to bounds
-        return false;
     }
     
     /**
@@ -100,13 +119,100 @@ public class SMOOptimizer {
         return 0.0;
     }
     
-    // Additional methods for more advanced SMO implementations:
+    /**
+     * Optimizes a pair of Lagrange multipliers (alphas)
+     * 
+     * @param i First index
+     * @param j Second index
+     * @param X Training data
+     * @param y Training labels
+     * @param alphas Current alpha values
+     * @param errors Error cache
+     * @param b Current bias
+     * @return true if the alphas were changed significantly
+     */
+    private boolean optimizePair(int i, int j, double[][] X, double[] y, double[] alphas, 
+                                double[] errors, double[] b) {
+        // TODO: Calculate errors, eta, and update the alpha values using equations above
+        // 1. Get current alpha values
+        // 2. Calculate eta using kernel function
+        // 3. Update alpha_2 (unconstrained)
+        // 4. Compute bounds L and H
+        // 5. Clip alpha_2 to bounds
+        // 6. Update alpha_1
+        // 7. Update bias
+        // 8. Update error cache
+        
+        return false;
+    }
+    
+    // === ADVANCED OPTIMIZATION TECHNIQUES (REFERENCE) ===
     
     /*
-     * Selects the next two alpha coefficients to optimize using heuristics.
-     * Useful for faster convergence in a full SMO implementation.
+     * === ADVANCED POINT SELECTION STRATEGIES ===
+     * 
+     * 1. First Point Selection (I1):
+     *    - Scan through non-bound examples (0 < alpha < C) to find points that violate KKT conditions
+     *    - If none found, scan through all points
+     *    - KKT violation check: |y_i * f(x_i) - 1| > tolerance
+     * 
+     * 2. Second Point Selection (I2):
+     *    - Choose point that maximizes |E_i1 - E_i2|
+     *    - Ensures maximum step size in optimization
+     *    
+     * Reference implementation:
+     * private int[] selectWorkingSet(double[] alphas, double[][] X, double[] y, double[] errors) {
+     *     // First find i1 - point that violates KKT conditions
+     *     int i1 = findKKTViolator(alphas, y, errors);
+     *     
+     *     // Then find i2 - point with maximum |E_i1 - E_i2|
+     *     int i2 = findMaximumViolatingPair(i1, alphas, errors);
+     *     
+     *     return new int[] {i1, i2};
+     * }
+     * 
+     * === KKT CONDITION CHECKING ===
+     * 
+     * KKT Conditions (more detailed):
+     * - If α_i = 0: y_i·f(x_i) ≥ 1     (point is correctly classified with margin)
+     * - If 0 < α_i < C: y_i·f(x_i) = 1  (point is exactly on margin)
+     * - If α_i = C: y_i·f(x_i) ≤ 1     (point may be within margin or misclassified)
+     * 
+     * A point violates KKT conditions when:
+     * - α_i = 0 and y_i·f(x_i) < 1
+     * - 0 < α_i < C and y_i·f(x_i) ≠ 1
+     * - α_i = C and y_i·f(x_i) > 1
+     * 
+     * Code example:
+     * private boolean checkKKTViolation(double alpha, double y, double fx, double tolerance) {
+     *     if (alpha < 1e-8) {  // Effectively zero
+     *         return y * fx < 1 - tolerance;
+     *     } else if (alpha > C - 1e-8) {  // Effectively at C
+     *         return y * fx > 1 + tolerance;
+     *     } else {
+     *         return Math.abs(y * fx - 1) > tolerance;
+     *     }
+     * }
+     * 
+     * === SHRINKING HEURISTIC ===
+     * 
+     * Shrinking speeds up optimization by focusing on non-bound examples:
+     * - Skip optimization for points where alphas are at bounds (0 or C)
+     *   and have remained unchanged for several iterations
+     * - Periodically check if bound examples still satisfy KKT conditions
+     * 
+     * === ADVANCED BIAS UPDATES ===
+     * 
+     * More precise bias selection:
+     * - If 0 < α₁_new < C: b_new = b₁_new
+     * - Else if 0 < α₂_new < C: b_new = b₂_new
+     * - Else: b_new = (b₁_new + b₂_new)/2
+     * 
+     * Where:
+     * - b₁_new = b - E₁ - y₁·(α₁_new - α₁)·K(x₁,x₁) - y₂·(α₂_new - α₂)·K(x₁,x₂)
+     * - b₂_new = b - E₂ - y₁·(α₁_new - α₁)·K(x₁,x₂) - y₂·(α₂_new - α₂)·K(x₂,x₂)
      */
-    // private int[] selectWorkingSet(double[] alphas, double[][] X, double[] y, double[] errors) { ... }
+
     
     /*
      * Maintains an error cache to speed up computations.
