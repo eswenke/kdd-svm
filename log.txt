@@ -1,0 +1,39 @@
+SVM Project
+
+All team members put in considerable time researching data sets.
+
+Ethan Swenke:
+Ethan was the project manager. He spent tons of time
+researching and made a general layout of what classes and functions
+we needed. Ethan worked specifically on the SVMOptimizer, DataPreprocessor,
+and the DataSplitter classes. Ethan also aided in the creating the presentation
+and report.
+
+Total time worked: blank hours
+
+
+Gannon Bardasian:
+Gannon was responsible for completing the Metrics class
+as well as the MetricsTesting class. Gannon also played a
+vital role in organizing and working on our slide show as
+well as our report.
+
+Total time worked: blank hours
+
+
+Leah Sarles:
+Leah was responsible for creating all of our math functions.
+Specifically she worked on the MartixOps, VectorOps, and
+ SVM.java classes. Leah also worked extensively on the presentation
+and aided Gannon is planning it out. Lastly, she helped work on the report
+
+Total time worked: blank hours
+
+
+Ronan Valadez:
+Ronan was responsible for implementing the kernel interface
+for the following classes: LinearKernel, PolynomialKernel,
+and RBFKernel. He also completed the SVMModel class, and worked on the
+slide show presentation and report.
+
+Total time worked: 6 hours
