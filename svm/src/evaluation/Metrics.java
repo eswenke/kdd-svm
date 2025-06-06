@@ -135,7 +135,6 @@ public class Metrics {
      * @return F1 score between 0 and 1
      */
     public static double f1Score(double[] yTrue, double[] yPred, double positiveClass) {
-        // TODO: Implement F1 score calculation
         // Harmonic mean of precision and recall
         double precision = precision(yTrue, yPred, positiveClass);
         double recall = recall(yTrue, yPred, positiveClass);

@@ -36,7 +36,7 @@ public class SVMModel {
      * @param C Regularization parameter
      * @param maxIterations Maximum number of iterations for optimization
      */
-    public SVMModel(SVMKernel kernel, double C, int maxIterations) {
+    public SVMModel(double C, int maxIterations, SVMKernel kernel) {
         this.kernel = kernel;
         this.C = C;
         this.optimizer = new SMOOptimizer(C, maxIterations, kernel);

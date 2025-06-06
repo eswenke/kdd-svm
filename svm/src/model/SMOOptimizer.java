@@ -76,26 +76,67 @@ public class SMOOptimizer {
         //    b_new = b - E₁ - y₁·(α₁_new - α₁)·K(x₁,x₁) - y₂·(α₂_new - α₂)·K(x₁,x₂)
         
         // --- IMPLEMENTATION ---
-        // initialize alpha array to zeros, bias to 0, and prepare error cache array
+        // initialize alpha array to zeros, bias to small values, and prepare error cache array
         double[] alphas = new double[y.length];
         double[] errors = new double[y.length];
         double bias = 0.0;
         
-        // main optimization loop (fixed number of iterations)
+        // initialize alphas with small random values to break symmetry
+        for (int i = 0; i < y.length; i++) {
+            alphas[i] = Math.random() * 0.01;
+        }
+        
+        // initialize error cache
+        for (int i = 0; i < y.length; i++) {
+            errors[i] = computeOutput(X[i], X, y, alphas, bias) - y[i];
+        }
+        
+        System.out.println("Starting SMO optimization with C=" + C + ", maxIterations=" + maxIterations);
+        int num_changed = 0;
+        int below_10 = 0;
+        
+        // main optimization loop with early stopping if no progress is made
         for (int iter = 0; iter < maxIterations; iter++) {
-            // select two random alphas to optimize
-            int i = (int) (Math.random() * y.length);
-            int j = (int) (Math.random() * y.length);
-            
-            // ensure different indices
-            while (j == i) {
-                j = (int) (Math.random() * y.length);
+            num_changed = 0;
+
+            // random selection for other iterations (batches in 100 for our dataset)
+            for (int attempt = 0; attempt < Math.min(100, y.length); attempt++) {
+                int i = (int) (Math.random() * y.length);
+                int j = (int) (Math.random() * y.length);
+                
+                // ensure different indices
+                while (j == i) {
+                    j = (int) (Math.random() * y.length);
+                }
+                
+                double oldBias = bias;
+                bias = optimizePair(i, j, X, y, alphas, errors, bias);
+                if (bias != oldBias) {
+                    num_changed++;
+                }
             }
 
-            // optimize selected alpha pair using helper method
-            bias = optimizePair(i, j, X, y, alphas, errors, bias);
-        }
+            System.out.println("Iteration " + iter + ": Random selection, " + num_changed + " alphas changed");
+            
+            // for early stopping if little progress is made
+            if (num_changed < 10) {
+                below_10++;
+            }
 
+            if (below_10 > 5) {
+                System.out.println("Early stopping at iteration " + iter + " - less than 10 alphas changed for 5 iterations");
+                break;
+            }
+        }
+        
+        // count support vectors
+        int supportVectorCount = 0;
+        for (int i = 0; i < alphas.length; i++) {
+            if (Math.abs(alphas[i]) > 1e-5) {
+                supportVectorCount++;
+            }
+        }
+        System.out.println("Optimization completed with " + supportVectorCount + " support vectors out of " + y.length + " training examples");
 
         return new Object[] {alphas, bias};
     }
@@ -114,9 +155,9 @@ public class SMOOptimizer {
      */
     private double optimizePair(int i, int j, double[][] X, double[] y, double[] alphas, 
                                 double[] errors, double bias) {
-        // calcuate the errors and cache them immediately: E_i = f(x_i) - y_i
+        // calculate the errors and cache them immediately: E_i = f(x_i) - y_i
         double err_1 = computeOutput(X[i], X, y, alphas, bias) - y[i];
-        double err_2 = computeOutput(X[j], X, y, alphas, bias) - y[i];
+        double err_2 = computeOutput(X[j], X, y, alphas, bias) - y[j]; // Fixed: using y[j] instead of y[i]
         errors[i] = err_1;
         errors[j] = err_2;
 
@@ -138,6 +179,11 @@ public class SMOOptimizer {
         // --------------------------------------------
         // compute η = 2·K(x₁,x₂) - K(x₁,x₁) - K(x₂,x₂)
         double eta = 2 * sim_12 - sim_11 - sim_22;
+        
+        // if eta is not positive, we can't make progress with this pair
+        if (eta >= -1e-10) { // using a small negative threshold to account for numerical precision
+            return bias; // return without updating
+        }
 
         // calculate unconstrained α₂_new = α₂ - y₂·(E₁ - E₂)/η
         double new_a2 = old_a2 - y2 * (err_1 - err_2) / eta;
@@ -162,16 +208,35 @@ public class SMOOptimizer {
 
         // update α₁_new = α₁ + y₁·y₂·(α₂ - α₂_new)
         new_a1 = old_a1 + y1 * y2 * (old_a2 - new_a2);
+        
+        // check if we're making significant progress (avoid numerical issues)
+        double tolerance = 1e-5;
+        if (Math.abs(new_a2 - old_a2) < tolerance) {
+            return bias; // no significant change, return without updating
+        }
+        
+        // clip alpha1 to [0, C] bounds
+        new_a1 = Math.max(0, Math.min(C, new_a1));
+        
+        // update the alpha values in the array
+        alphas[i] = new_a1;
+        alphas[j] = new_a2;
 
         // update bias        
         // bias_new = b - E₁ - y₁·(α₁_new - α₁)·K(x₁,x₁) - y₂·(α₂_new - α₂)·K(x₁,x₂)
         double bias_new = bias - err_1 - y1 * (new_a1 - old_a1) * sim_11 - y2 * ((new_a2 - old_a2)) * sim_12;
         
         // update error cache
-        // loop through all errors and run computeOutput() - bias_new, store in cache
+        // only update errors for the two changed alphas and any other alphas that need recalculation
+        // this is more efficient than recalculating all errors
         for (int k = 0; k < errors.length; k++) {
-            // E_i = f(x_i) - y_i
-            errors[k] = computeOutput(X[k], X, y, alphas, bias_new) - y[k];
+            if (k == i || k == j) {
+                // always update errors for the two alphas we just changed
+                errors[k] = computeOutput(X[k], X, y, alphas, bias_new) - y[k];
+            } else if (alphas[k] > 0 && alphas[k] < C) {
+                // also update errors for non-bound support vectors
+                errors[k] = computeOutput(X[k], X, y, alphas, bias_new) - y[k];
+            }
         }
         
         return bias_new;
@@ -197,7 +262,7 @@ public class SMOOptimizer {
 
         return sum + b;
     }
-
+    
     
     // === ADVANCED OPTIMIZATION TECHNIQUES (REFERENCE) ===
     
