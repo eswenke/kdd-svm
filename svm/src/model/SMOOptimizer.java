@@ -14,9 +14,6 @@ public class SMOOptimizer {
     // Regularization parameter (controls trade-off between margin and training error)
     private double C;
     
-    // Tolerance parameter for KKT conditions (that check for optimality and convergence)
-    private double tolerance;
-    
     // Maximum number of iterations
     private int maxIterations;
     
@@ -31,9 +28,8 @@ public class SMOOptimizer {
      * @param maxIterations Maximum number of iterations
      * @param kernel Kernel function to use (linear most likely, rbf or poly if necessary)
      */
-    public SMOOptimizer(double C, double tolerance, int maxIterations, Kernel kernel) {
+    public SMOOptimizer(double C, int maxIterations, Kernel kernel) {
         this.C = C;
-        this.tolerance = tolerance;
         this.maxIterations = maxIterations;
         this.kernel = kernel;
     }
@@ -45,8 +41,8 @@ public class SMOOptimizer {
      * @param maxIterations Maximum number of iterations
      * @param kernel Kernel function to use
      */
-    public SMOOptimizer(double tolerance, int maxIterations, Kernel kernel) {
-        this(1.0, tolerance, maxIterations, kernel);
+    public SMOOptimizer(int maxIterations, Kernel kernel) {
+        this(1.0, maxIterations, kernel);
     }
     
     /**
@@ -78,47 +74,36 @@ public class SMOOptimizer {
         // 4. Bias Update:
         //    b_new = b - E₁ - y₁·(α₁_new - α₁)·K(x₁,x₁) - y₂·(α₂_new - α₂)·K(x₁,x₂)
         
-        // --- IMPLEMENTATION PLAN ---
+        // --- IMPLEMENTATION ---
+        // initialize alpha array to zeros, bias to 0, and prepare error cache array
+        double[] alphas = new double[y.length];
+        double[] errors = new double[y.length];
+        double bias = 0.0;
         
-        // 1. Initialize model parameters
-        // TODO: Initialize alpha array to zeros, bias to 0, and prepare error cache array
-        
-        // 2. Main optimization loop (fixed number of iterations)
-        // TODO: Loop for a fixed number of iterations (e.g., maxIter = 100)
-        
-        // 3. Select two alphas to optimize
-        // TODO: Simple selection - randomly choose two different indices
-        
-        // 4. Optimize selected alpha pair using helper method
-        // TODO: Call optimizePair() with selected indices
-        
-        // 5. Update bias
-        // TODO: Calculate new bias term after alpha updates
-        
-        // 6. Update error cache
-        // TODO: Recalculate errors for all points after alpha/bias update
-        
-        // 7. Prepare and return results
+        // main optimization loop (fixed number of iterations)
+        for (int iter = 0; iter < maxIterations; iter++) {
+            // select two alphas to optimize
+            int i = (int) (Math.random() * y.length);
+            int i_r = Math.floorDiv(i, 10);
+            int i_c = i % 10;
+            int j = (int) (Math.random() * y.length);
+            int j_r = Math.floorDiv(j, 10);
+            int j_c = j % 10;
+            
+            // ensure different indices
+            while (j == i) {
+                j = (int) (Math.random() * y.length);
+            }
+
+            // optimize selected alpha pair using helper method
+            optimizePair(i, j, X, y, alphas, errors, bias);
+            
+        }
+
+        // prepare and return results
         // TODO: Return alpha values, bias, and indices of support vectors (where alpha > 0)
         
         return null;
-    }
-    
-    /**
-     * Computes the SVM output for a given input vector. determines what side of the decision
-     * boundary a point falls on (classifies new data points)
-     * 
-     * @param x Input vector
-     * @param X Training features
-     * @param y Training labels
-     * @param alphas Lagrange multipliers
-     * @param b Bias term
-     * @return The SVM output
-     */
-    private double computeOutput(double[] x, double[][] X, double[] y, double[] alphas, double b) {
-        // TODO: Implement output computation (research the math, should be like 10 lines or less)
-        // f(x) = sum(alpha_i * y_i * K(x_i, x)) + b
-        return 0.0;
     }
     
     /**
@@ -131,22 +116,80 @@ public class SMOOptimizer {
      * @param alphas Current alpha values
      * @param errors Error cache
      * @param b Current bias
-     * @return true if the alphas were changed significantly
+     * @return both of the old alphas
      */
-    private boolean optimizePair(int i, int j, double[][] X, double[] y, double[] alphas, 
-                                double[] errors, double[] b) {
-        // TODO: Calculate errors, eta, and update the alpha values using equations above
-        // 1. Get current alpha values
-        // 2. Calculate eta using kernel function
-        // 3. Update alpha_2 (unconstrained)
-        // 4. Compute bounds L and H
-        // 5. Clip alpha_2 to bounds
-        // 6. Update alpha_1
-        // 7. Update bias
-        // 8. Update error cache
+    private void optimizePair(int i, int j, double[][] X, double[] y, double[] alphas, 
+                                double[] errors, double bias) {
+        // index for row, column of both selected datapoints
+        int i_r = Math.floorDiv(i, 10);
+        int i_c = i % 10;
+        int j_r = Math.floorDiv(j, 10);
+        int j_c = j % 10;
+
+        // calcuate the errors and cache them immediately: E_i = f(x_i) - y_i
+        double err_1 = computeOutput(X[i_r], X, y, alphas, bias) - y[i];
+        double err_2 = computeOutput(X[j_r], X, y, alphas, bias) - y[i];
+        errors[i] = err_1;
+        errors[j] = err_2;
+
+        // grab old alphas for future bias update
+        double old_a1 = alphas[i];
+        double old_a2 = alphas[j];
+
+        // alpha update steps:
+        //    a. Compute η = 2·K(x₁,x₂) - K(x₁,x₁) - K(x₂,x₂)
+        //    b. Calculate unconstrained α₂_new = α₂ - y₂·(E₁ - E₂)/η
+        //    c. Compute bounds for α₂_new:
+        //       If y₁ ≠ y₂: L = max(0, α₂ - α₁), H = min(C, C + α₂ - α₁)
+        //       If y₁ = y₂: L = max(0, α₁ + α₂ - C), H = min(C, α₁ + α₂)
+        //    d. Clip α₂_new to bounds: α₂_new = min(H, max(L, α₂_new))
+        //    e. Update α₁_new = α₁ + y₁·y₂·(α₂ - α₂_new)
+        double new_a1 = 0;
+        double new_a2 = 0;
+
+        // update bias
+        // y2 and y2 via labels with corresponding i, j indices
+        // x1 and x2 via X[i_r][i_c] and X[_r][_c]
+        // kernel(x1, x2) via compute with ^ indices
+        // the rest of the values have already been calculated
+        double y1 = y[i];
+        double sim_11 = kernel.compute(X[i_r][i_c], X[i_r][i_c]);
+        double y2 = y[j];
+        double sim_12 = kernel.compute(X[i_r][i_c], X[j_r][j_c]);
         
-        return false;
+        // bias_new = b - E₁ - y₁·(α₁_new - α₁)·K(x₁,x₁) - y₂·(α₂_new - α₂)·K(x₁,x₂)
+        double bias_new = bias - err_1 - y1 * (new_a1 - old_a1) * sim_11 - y2 * ((new_a2 - old_a2)) * sim_12;
+        
+        // update error cache
+        // loop through all errors and run computeOutput() - bias_new, store in cache
+        for (int k; k < errors.length; k++) {
+            // E_i = f(x_i) - y_i
+            errors[k] = computeOutput(X[k], X, y, alphas, bias_new) - y[k];
+        }
+        
     }
+
+    /**
+     * Computes the SVM output for a given input vector. determines what side of the decision
+     * boundary a point falls on (classifies new data points)
+     * 
+     * @param x Input vector
+     * @param X Training features
+     * @param y Training labels
+     * @param alphas Lagrange multipliers
+     * @param b Bias term
+     * @return The SVM output
+     */
+    private double computeOutput(double[] x, double[][] X, double[] y, double[] alphas, double b) {
+        double sum = 0.0;
+        for (int i; i < y.length; i++) {
+            // f(x) = sum(alpha_i * y_i * K(x_i, x)) + b
+            sum += alphas[i] * y[i] * kernel.compute(X[i], x);
+        }
+
+        return sum + b;
+    }
+
     
     // === ADVANCED OPTIMIZATION TECHNIQUES (REFERENCE) ===
     
