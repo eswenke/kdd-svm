@@ -5,17 +5,11 @@ import java.io.IOException;
 
 import model.LinearKernel;
 import model.SVMModel;
-import model.Kernel;
 import processing.CSVReader;
 import processing.DataPreprocessor;
 import processing.DataSplitter;
-import model.SVMModel;
 import model.SVMKernel;
-import model.LinearKernel;
-import model.PolynomialKernel;
-import model.RBFKernel;
 import evaluation.ModelEvaluator;
-import evaluation.Metrics;
 
 /**
  * Main SVM class that demonstrates the SVM implementation with different kernels

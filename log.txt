@@ -9,7 +9,7 @@ we needed. Ethan worked specifically on the SVMOptimizer, DataPreprocessor,
 and the DataSplitter classes. Ethan also aided in the creating the presentation
 and report.
 
-Total time worked: blank hours
+Total time worked: 15 hours
 
 
 Gannon Bardasian:
