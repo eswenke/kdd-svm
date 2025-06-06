@@ -21,7 +21,7 @@ public class SVMModel {
     private double[] supportVectorLabels;
     
     // Kernel function
-    private Kernel kernel;
+    private SVMKernel kernel;
     
     // Regularization parameter
     private double C;
@@ -34,13 +34,12 @@ public class SVMModel {
      * 
      * @param kernel Kernel function to use
      * @param C Regularization parameter
-     * @param tolerance Tolerance for optimization
      * @param maxIterations Maximum number of iterations for optimization
      */
-    public SVMModel(Kernel kernel, double C, double tolerance, int maxIterations) {
+    public SVMModel(SVMKernel kernel, double C, int maxIterations) {
         this.kernel = kernel;
         this.C = C;
-        this.optimizer = new SMOOptimizer(C, tolerance, maxIterations, kernel);
+        this.optimizer = new SMOOptimizer(C, maxIterations, kernel);
     }
     
     /**

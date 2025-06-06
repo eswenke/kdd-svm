@@ -9,7 +9,7 @@ import math.VectorOps;
  * Kernel functions are used to transform the input space into a higher-dimensional
  * feature space, allowing SVMs to find non-linear decision boundaries.
  */
-public interface Kernel {
+public interface SVMKernel {
     
     /**
      * Computes the kernel function value for two vectors. a vector, in our case, is a list of
@@ -35,11 +35,10 @@ public interface Kernel {
  * The linear kernel is defined as K(x, y) = x · y (dot product).
  * This is the simplest kernel and is suitable for linearly separable data.
  */
-public class LinearKernel implements Kernel {
+public class LinearKernel implements SVMKernel {
     
     @Override
     public double compute(double[] x, double[] y) {
-        // TODO: Implement linear kernel (dot product)
         // Use VectorOps.dotProduct(x, y)
         return VectorOps.dotProduct(x, y);
     }
@@ -57,7 +56,7 @@ public class LinearKernel implements Kernel {
  * Useful for data that has non-linear decision boundaries.
  * K(x, y) = (x · y + c)^d where c is a constant and d is the degree.
  */
-public class PolynomialKernel implements Kernel {
+public class PolynomialKernel implements SVMKernel {
     private final double constant;
     private final int degree;
     
@@ -85,7 +84,7 @@ public class PolynomialKernel implements Kernel {
  * Useful for complex non-linear classification tasks.
  * K(x, y) = exp(-gamma * ||x - y||^2)
  */
-public class RBFKernel implements Kernel {
+public class RBFKernel implements SVMKernel {
     private final double gamma;
     
     // Constructor with custom gamma parameter

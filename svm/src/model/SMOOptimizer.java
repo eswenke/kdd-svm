@@ -1,5 +1,8 @@
 package model;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 /**
  * Simplified Sequential Minimal Optimization (SMO) algorithm implementation for SVM training.
  * 
@@ -18,17 +21,16 @@ public class SMOOptimizer {
     private int maxIterations;
     
     // Kernel function to use (no kernel just means 'linear' kernel. we must make one)
-    private Kernel kernel;
+    private SVMKernel kernel;
     
     /**
      * Creates an SMO optimizer with the specified parameters.
      * 
      * @param C Regularization parameter (controls how much room we leave for error)
-     * @param tolerance Tolerance for KKT conditions (how close to optimal solution we need to be)
      * @param maxIterations Maximum number of iterations
      * @param kernel Kernel function to use (linear most likely, rbf or poly if necessary)
      */
-    public SMOOptimizer(double C, int maxIterations, Kernel kernel) {
+    public SMOOptimizer(double C, int maxIterations, SVMKernel kernel) {
         this.C = C;
         this.maxIterations = maxIterations;
         this.kernel = kernel;
@@ -37,11 +39,10 @@ public class SMOOptimizer {
     /**
      * Creates an SMO optimizer with default C value of 1.0.
      * 
-     * @param tolerance Tolerance for KKT conditions
      * @param maxIterations Maximum number of iterations
      * @param kernel Kernel function to use
      */
-    public SMOOptimizer(int maxIterations, Kernel kernel) {
+    public SMOOptimizer(int maxIterations, SVMKernel kernel) {
         this(1.0, maxIterations, kernel);
     }
     
@@ -82,13 +83,9 @@ public class SMOOptimizer {
         
         // main optimization loop (fixed number of iterations)
         for (int iter = 0; iter < maxIterations; iter++) {
-            // select two alphas to optimize
+            // select two random alphas to optimize
             int i = (int) (Math.random() * y.length);
-            int i_r = Math.floorDiv(i, 10);
-            int i_c = i % 10;
             int j = (int) (Math.random() * y.length);
-            int j_r = Math.floorDiv(j, 10);
-            int j_c = j % 10;
             
             // ensure different indices
             while (j == i) {
@@ -96,14 +93,11 @@ public class SMOOptimizer {
             }
 
             // optimize selected alpha pair using helper method
-            optimizePair(i, j, X, y, alphas, errors, bias);
-            
+            bias = optimizePair(i, j, X, y, alphas, errors, bias);
         }
 
-        // prepare and return results
-        // TODO: Return alpha values, bias, and indices of support vectors (where alpha > 0)
-        
-        return null;
+
+        return new Object[] {alphas, bias};
     }
     
     /**
@@ -116,19 +110,13 @@ public class SMOOptimizer {
      * @param alphas Current alpha values
      * @param errors Error cache
      * @param b Current bias
-     * @return both of the old alphas
+     * @return the new bias
      */
-    private void optimizePair(int i, int j, double[][] X, double[] y, double[] alphas, 
+    private double optimizePair(int i, int j, double[][] X, double[] y, double[] alphas, 
                                 double[] errors, double bias) {
-        // index for row, column of both selected datapoints
-        int i_r = Math.floorDiv(i, 10);
-        int i_c = i % 10;
-        int j_r = Math.floorDiv(j, 10);
-        int j_c = j % 10;
-
         // calcuate the errors and cache them immediately: E_i = f(x_i) - y_i
-        double err_1 = computeOutput(X[i_r], X, y, alphas, bias) - y[i];
-        double err_2 = computeOutput(X[j_r], X, y, alphas, bias) - y[i];
+        double err_1 = computeOutput(X[i], X, y, alphas, bias) - y[i];
+        double err_2 = computeOutput(X[j], X, y, alphas, bias) - y[i];
         errors[i] = err_1;
         errors[j] = err_2;
 
@@ -136,37 +124,57 @@ public class SMOOptimizer {
         double old_a1 = alphas[i];
         double old_a2 = alphas[j];
 
-        // alpha update steps:
-        //    a. Compute η = 2·K(x₁,x₂) - K(x₁,x₁) - K(x₂,x₂)
-        //    b. Calculate unconstrained α₂_new = α₂ - y₂·(E₁ - E₂)/η
-        //    c. Compute bounds for α₂_new:
-        //       If y₁ ≠ y₂: L = max(0, α₂ - α₁), H = min(C, C + α₂ - α₁)
-        //       If y₁ = y₂: L = max(0, α₁ + α₂ - C), H = min(C, α₁ + α₂)
-        //    d. Clip α₂_new to bounds: α₂_new = min(H, max(L, α₂_new))
-        //    e. Update α₁_new = α₁ + y₁·y₂·(α₂ - α₂_new)
-        double new_a1 = 0;
-        double new_a2 = 0;
-
-        // update bias
         // y2 and y2 via labels with corresponding i, j indices
-        // x1 and x2 via X[i_r][i_c] and X[_r][_c]
-        // kernel(x1, x2) via compute with ^ indices
-        // the rest of the values have already been calculated
         double y1 = y[i];
-        double sim_11 = kernel.compute(X[i_r][i_c], X[i_r][i_c]);
         double y2 = y[j];
-        double sim_12 = kernel.compute(X[i_r][i_c], X[j_r][j_c]);
-        
+
+        // x1 and x2 via X[i_r][i_c] and X[_r][_c]
+        // kernel(x1, x2), etc., via compute with ^ indices
+        double sim_11 = kernel.compute(X[i], X[i]);
+        double sim_12 = kernel.compute(X[i], X[j]);
+        double sim_22 = kernel.compute(X[j], X[j]);
+
+        // ALPHA UPDATE:
+        // --------------------------------------------
+        // compute η = 2·K(x₁,x₂) - K(x₁,x₁) - K(x₂,x₂)
+        double eta = 2 * sim_12 - sim_11 - sim_22;
+
+        // calculate unconstrained α₂_new = α₂ - y₂·(E₁ - E₂)/η
+        double new_a2 = old_a2 - y2 * (err_1 - err_2) / eta;
+        double new_a1 = 0;
+
+        // compute bounds for α₂_new:
+        //  - If y₁ ≠ y₂: L = max(0, α₂ - α₁), H = min(C, C + α₂ - α₁)
+        //  - If y₁ = y₂: L = max(0, α₁ + α₂ - C), H = min(C, α₁ + α₂)
+        double L = 0.0;
+        double H = 0.0;
+        if (y1 != y2) {
+            L = max(0, old_a2 - old_a1);
+            H = min(C, C + old_a2 - old_a1);
+        } 
+        else if (y1 == y2) {
+            L = max(0, old_a1 + old_a2 - C);
+            H = min(C, old_a1 + old_a2);
+        }
+
+        // clip α₂_new to bounds: α₂_new = min(H, max(L, α₂_new))
+        new_a2 = min(H, max(L, new_a2));
+
+        // update α₁_new = α₁ + y₁·y₂·(α₂ - α₂_new)
+        new_a1 = old_a1 + y1 * y2 * (old_a2 - new_a2);
+
+        // update bias        
         // bias_new = b - E₁ - y₁·(α₁_new - α₁)·K(x₁,x₁) - y₂·(α₂_new - α₂)·K(x₁,x₂)
         double bias_new = bias - err_1 - y1 * (new_a1 - old_a1) * sim_11 - y2 * ((new_a2 - old_a2)) * sim_12;
         
         // update error cache
         // loop through all errors and run computeOutput() - bias_new, store in cache
-        for (int k; k < errors.length; k++) {
+        for (int k = 0; k < errors.length; k++) {
             // E_i = f(x_i) - y_i
             errors[k] = computeOutput(X[k], X, y, alphas, bias_new) - y[k];
         }
         
+        return bias_new;
     }
 
     /**
@@ -182,7 +190,7 @@ public class SMOOptimizer {
      */
     private double computeOutput(double[] x, double[][] X, double[] y, double[] alphas, double b) {
         double sum = 0.0;
-        for (int i; i < y.length; i++) {
+        for (int i = 0; i < y.length; i++) {
             // f(x) = sum(alpha_i * y_i * K(x_i, x)) + b
             sum += alphas[i] * y[i] * kernel.compute(X[i], x);
         }
