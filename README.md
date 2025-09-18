@@ -1,34 +1,84 @@
-# Building an SVM from Scratch
+# Support Vector Machine Implementation
 
-## Team Members
-- Ethan Swenke
-- Leah Sarles
-- Ronan Valadez
-- Gannon Bardasian
+A comprehensive Java implementation of Support Vector Machine (SVM) with Sequential Minimal Optimization (SMO) algorithm, featuring multiple kernel functions and complete evaluation metrics.
 
+## 🚀 Overview
 
-## Running The Project
- `mvn compile exec:java -Dexec.mainClass="SVM`
+This project implements a Support Vector Machine from scratch in Java, demonstrating core machine learning concepts including optimization algorithms, kernel methods, and model evaluation. The implementation features the SMO algorithm for efficient quadratic programming optimization and supports multiple kernel functions for non-linear classification tasks.
 
-## Project Overview
-This project implements an algorithm for a Support Vector Machine (SVM). SVMs are powerful supervised learning models used for classification, regression, and outlier detection. We will be working with a dataset involving basic binary classification.
+## 🛠️ Tech Stack
 
-## Dataset
-- https://www.kaggle.com/datasets/mexwell/binary-classification-for-sensor-signals/data
+- **Language**: Java 8+
+- **Build Tools**: Maven, Custom Build Script
+- **Dependencies**: Apache Commons Math3, JUnit
+- **Architecture**: Modular package-based design
 
-## Useful Resources
-- PCA : 
+## ✨ Key Features
 
-### SVM Fundamentals
-- [Support Vector Machines - Scikit-learn Documentation](https://scikit-learn.org/stable/modules/svm.html)
+- **SMO Optimization**: Sequential Minimal Optimization algorithm for efficient SVM training
+- **Multiple Kernels**: Linear, Polynomial, and RBF (Radial Basis Function) kernel implementations
+- **Data Processing**: Complete preprocessing pipeline with normalization and stratified splitting
+- **Model Evaluation**: Comprehensive metrics including accuracy, precision, recall, F1-score, and confusion matrix
+- **Mathematical Operations**: Custom vector and matrix operations for SVM computations
 
-### Implementation Resources
-- [SVM Guide](https://www.csie.ntu.edu.tw/~cjlin/papers/guide/guide.pdf) - A guide to SVM's for beginners
-- [Scikit-learn SVM Examples](https://scikit-learn.org/stable/auto_examples/svm/index.html)
-- [SVM Kernels](https://data-flair.training/blogs/svm-kernel-functions/)
-- [Step by Step of the Algorithm](https://towardsdatascience.com/implementing-svm-from-scratch-784e4ad0bc6a/)
+## 📊 Package Architecture
 
-### Advanced Topics
-- [Kernel Methods and Support Vector Machines](https://www.cs.cmu.edu/~epxing/Class/10701-08s/Lecture/lecture16.pdf)
-- [Large Scale SVM Training](https://www.csie.ntu.edu.tw/~cjlin/papers/distributed_svm/distributed_svm.pdf)
-- [Multi-class SVM](https://www.jmlr.org/papers/volume2/crammer01a/crammer01a.pdf)
+The project follows a modular architecture with specialized packages:
+
+- **`model/`** - Core SVM implementation and kernel functions
+  - `SVMModel.java` - Main SVM classifier with SMO optimization
+  - `SMOOptimizer.java` - Sequential Minimal Optimization algorithm
+  - `LinearKernel.java`, `PolynomialKernel.java`, `RBFKernel.java` - Kernel implementations
+  - `SVMKernel.java` - Kernel interface
+
+- **`processing/`** - Data preprocessing and manipulation
+  - `CSVReader.java` - Dataset loading and parsing
+  - `DataPreprocessor.java` - Feature normalization and data preparation
+  - `DataSplitter.java` - Train/validation/test set splitting with stratification
+
+- **`evaluation/`** - Model performance assessment
+  - `ModelEvaluator.java` - Comprehensive model evaluation framework
+  - `Metrics.java` - Classification metrics calculation
+
+- **`math/`** - Mathematical operations
+  - `VectorOps.java` - Vector operations for SVM computations
+  - `MatrixOps.java` - Matrix operations and linear algebra
+
+- **`testing/`** - Unit tests and validation
+- **`data/`** - Dataset storage
+
+## 🚦 Running The Project
+
+### Using Maven (Recommended)
+```bash
+mvn compile exec:java -Dexec.mainClass="SVM"
+```
+
+### Using Build Script (Alternative)
+If Maven is not available or causing issues, use the provided build script:
+
+```bash
+# On Unix/Linux/macOS
+./build.sh
+
+# Then run the compiled program
+java -cp target SVM
+```
+
+The build script compiles all Java files (excluding test files requiring JUnit dependencies) and places them in the `target` directory.
+
+### Manual Compilation
+```bash
+# Compile all source files
+find svm/src -name "*.java" -type f | xargs javac -d target
+
+# Run the main class
+java -cp target SVM
+```
+
+## 👥 Contributors
+
+- **Ethan Swenke**
+- **Leah Sarles** 
+- **Ronan Valadez**
+- **Gannon Bardasian**
