@@ -2,18 +2,23 @@
 
 A comprehensive Java implementation of Support Vector Machine (SVM) with Sequential Minimal Optimization (SMO) algorithm, featuring multiple kernel functions and complete evaluation metrics.
 
-## 🚀 Overview
+## Overview
 
 This project implements a Support Vector Machine from scratch in Java, demonstrating core machine learning concepts including optimization algorithms, kernel methods, and model evaluation. The implementation features the SMO algorithm for efficient quadratic programming optimization and supports multiple kernel functions for non-linear classification tasks.
 
-## 🛠️ Tech Stack
+The SVM is applied to a binary classification problem using sensor signal data, where the goal is to identify whether a sensor is immersed in water or oil based on signal characteristics.
+
+## Dataset
+- https://www.kaggle.com/datasets/mexwell/binary-classification-for-sensor-signals/data
+
+## Tech Stack
 
 - **Language**: Java 8+
 - **Build Tools**: Maven, Custom Build Script
 - **Dependencies**: Apache Commons Math3, JUnit
 - **Architecture**: Modular package-based design
 
-## ✨ Key Features
+## Key Features
 
 - **SMO Optimization**: Sequential Minimal Optimization algorithm for efficient SVM training
 - **Multiple Kernels**: Linear, Polynomial, and RBF (Radial Basis Function) kernel implementations
@@ -21,7 +26,7 @@ This project implements a Support Vector Machine from scratch in Java, demonstra
 - **Model Evaluation**: Comprehensive metrics including accuracy, precision, recall, F1-score, and confusion matrix
 - **Mathematical Operations**: Custom vector and matrix operations for SVM computations
 
-## 📊 Package Architecture
+## Package Architecture
 
 The project follows a modular architecture with specialized packages:
 
@@ -47,7 +52,7 @@ The project follows a modular architecture with specialized packages:
 - **`testing/`** - Unit tests and validation
 - **`data/`** - Dataset storage
 
-## 🚦 Running The Project
+## Running The Project
 
 ### Using Maven (Recommended)
 ```bash
@@ -76,9 +81,10 @@ find svm/src -name "*.java" -type f | xargs javac -d target
 java -cp target SVM
 ```
 
-## 👥 Contributors
+## Contributors
 
 - **Ethan Swenke**
 - **Leah Sarles** 
 - **Ronan Valadez**
 - **Gannon Bardasian**
+
